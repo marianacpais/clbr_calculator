@@ -12,7 +12,43 @@ Access a live instance of the CLBR Calculator at [clbrcalculator.med.up.pt](http
 
 ## Getting Started
 
-For those interested in running the CLBR Calculator locally or contributing to its development, please refer to the setup instructions and contribution guidelines outlined below.
+To run the CLBR Calculator locally using Docker, ensure you have Docker installed on your system. This setup allows you to containerize the application, simplifying the deployment process and ensuring consistency across different environments.
+
+### Prerequisites
+
+- Docker
+- Git (optional, for cloning the repository)
+- Make (optional, for simplified Docker commands)
+
+### Setup Instructions
+
+1. **Clone the repository** (skip this step if you have the project files already):
+
+    ```sh
+    git clone https://github.com/marianacpais/clbr_calculator.git
+    cd clbr-calculator
+    ```
+
+2. **Build and run the Docker image using Make**:
+
+    The project includes a Makefile for convenience, which contains shorthand commands to simplify Docker operations. To build the Docker image and run it as a container, execute:
+
+    ```sh
+    make docker
+    ```
+
+    This command utilizes the `docker` target in the Makefile to build a Docker image named `clbrcalculator:alfa` and runs it as a container named `clbrcalculator`, making the application accessible at `localhost:8080`.
+
+    If you prefer not to use Make, you can achieve the same result with the following Docker commands:
+
+    ```sh
+    docker build -t clbrcalculator:alfa .
+    docker run --name clbrcalculator -d -p 8080:8080 clbrcalculator:alfa
+    ```
+
+3. **Access the application**:
+
+    Open your web browser and go to `http://localhost:8080/` to start using the CLBR Calculator.
 
 ## How to Use
 

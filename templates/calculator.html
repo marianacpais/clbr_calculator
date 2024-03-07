@@ -1,0 +1,184 @@
+{% extends "index.html" %}
+
+{% block content %}
+
+<div class="container text-left">
+    <div class="row g-4">
+      <div class="col-3">
+        <form action={{ url_for("index") }} method="POST">
+            <label for="weight">Weight (kg):</label>
+            <input type="number" class="form-control" id="weight" name="weight" value= {{ form_data["weight"] }} step='0.1' min="35.0" max="180.0"><br>
+            <label for="height">Height (cm):</label>
+            <input type="number" class="form-control" id="height" name="height" value= {{ form_data["height"] }} min="100" max="200"><br>
+
+            {% if e_bmi == True %}
+            <div class="alert alert-danger" role="danger">
+                Calculated BMI must be between 18 and 35.<br>
+                Current BMI: {{ bmi }}<br>
+            </div>
+            {% endif %}
+
+            <label for="dateOfBirth">Date of birth:</label>
+            <input type="date" class="form-control" id="dateOfBirth" name="dateOfBirth" value={{ form_data["dateOfBirth"] }}
+                        min={{ age_limits["date_min"] }} max={{ age_limits["date_max"] }}><br>
+            <label for="num_months">Select interval for calculations:</label>
+            <select class="form-select form-select" name="num_months" id="num_months">
+              <option value=3 {% if form_data["num_months"] == "3" %} selected {% endif %}>Three months</option>
+              <option value=6 {% if form_data["num_months"] == "6" %} selected {% endif %}>Six months</option>
+              <option value=9 {% if form_data["num_months"] == "9" %} selected {% endif %}>Nine months</option>
+              <option value=12 {% if form_data["num_months"] == "12" %} selected {% endif %}>Twelve months</option>
+            </select><br>
+
+            {% if e_months == True %}
+            <div class="alert alert-danger" role="danger">
+                Estimations cannot contemplate ages over 43 years.<br>
+                Please choose an appropriate timeframe.
+            </div>
+            {% endif %}
+
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+
+        </form>
+
+        <p>
+          <br>
+          <div class="d-grid gap-2">
+          <a class="btn btn-secondary" data-bs-toggle="collapse" href="#moreinfo" role="button" aria-expanded="false" aria-controls="collapseExample">
+            More information
+          </a>
+          </div>
+        </p>
+        <div class="collapse" id="moreinfo">
+          <div class="card card-body">
+            This calculator is based on results from a multicentre retrospective cohort study including 14213 patients undergoing their first IVF/ICSI cycle with autologous oocytes and subsequent embryo transfers. A multivariable logistic regression was performed to estimate Cumulative Live Birth Rates and allow for an interpatient comparison.
+          </div>
+        </div>
+
+      </div>
+      <div class="col">
+
+        {% if error != True %}
+        <div class="row g-4">
+            <h2>
+                If you start <em>in vitro</em> fertilization <mark>immediately</mark>...
+            </h2>
+            <img src={{ url_for('static', filename='graph.jpg') }}>
+            <br>
+            <p></p>
+        </div>
+    <div class="row row-cols-1 g-4 text-center">
+            <div class="col-3">
+              <div class="card h-100 text-bg-light">
+                <div class="card-body">
+                  <h4 class="card-title">BMI <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="popover" title="What is BMI?" data-bs-content="Body mass index (BMI) is a simple index of weight-for-height that is commonly used to classify overweight and obesity in adults. It is defined as a person's weight in kilograms divided by the square of their height in meters (kg/m^2). Source: WHO.">?</button></h4>
+                  <h5 class="card-title">{{ bmi }}</h5>
+                  <p class="card-text">kg/m<sup>2</sup></p>
+                </div>
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="card h-100 text-bg-light">
+                <div class="card-body">
+                    <h4 class="card-title">Age</h4>
+                    <h5 class="card-title">{{ age }}</h5>
+                    <p class="card-text">years</p>
+                  </div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="card h-100 border-info">
+                <div class="card-body">
+                    <h4 class="card-title">Estimated CLBR <button type="button" class="btn btn-outline-secondary btn-sm btn-border-radius-lg" data-bs-toggle="popover" title="What is CLBR?" data-bs-content="Cumulative Live Birth Rate. CLBR is defined as the delivery of at least one livebirth resulting from the initial oocyte pickup, including all fresh embryos transferred and/or eventual frozen embryos subsequently transferred, until the first delivery with a live-birth or all embryos are used, whichever occurred first. Source: International Committee for Monitoring Assisted Reproductive Technologies (ICMART).">?</button></h5>
+                    <div clas="container">
+                        <h1 class="display-6">{{ clbr }}</h1>
+                    </div>
+                  </div>
+                </div>
+              </div>
+        </div>
+            <div class="row g-4">
+                <h2>
+                    <br>
+                    If you delay <em>in vitro</em> fertilization for <mark>{{ form_data["num_months"] }} months</mark>...
+                </h2>
+            </div>
+
+            <div class="row row-cols-1 g-4 text-center">
+                <div class="col-12">
+                    <div class="card h-100 border-info">
+                            <h5 class="card-header">...and keep the same weight</h5>
+                            <div class="card-body">
+                              <h5 class="card-title">Estimated CLBR<sup>*</sup></h5>
+                              <h4>{{ clbr_months["keep_w"] }}</h4>
+                          </div>
+                      </div>
+                    </div>
+                <div class="col-6">
+                    <div class="card h-100">
+                            <h5 class="card-header">...and reduce 1 unit of BMI</h5>
+                            <div class="card-body">
+                              <h5 class="card-title">Estimated CLBR<sup>*</sup></h5>
+                              <h4>{{ clbr_months["loose1"] }}</h4>
+                          </div>
+                          <ul class="list-group list-group-flush">
+                            <li class="list-group-item">Weight goal between {{ loose1["w_min"] }} kg and {{ loose1["w_max"] }} kg</li>
+                            <li class="list-group-item">Weight reduction between {{ loose1["loss_2max"] }} kg and {{ loose1["loss_2min"] }} kg</li>
+                          </ul>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="card h-100">
+                                <h5 class="card-header">...and reduce 2 units of BMI</h5>
+                                <div class="card-body">
+                                  <h5 class="card-title">Estimated CLBR<sup>*</sup></h5>
+                                  <h4>{{ clbr_months["loose2"] }}</h4>
+                              </div>
+                              <ul class="list-group list-group-flush">
+                                <li class="list-group-item">Weight goal between {{ loose2["w_min"] }} kg and {{ loose2["w_max"] }} kg</li>
+                                <li class="list-group-item">Weight reduction between {{ loose2["loss_2max"] }} kg and {{ loose2["loss_2min"] }} kg</li>
+                              </ul>
+                          </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card h-100">
+                                    <h5 class="card-header">...and reduce 3 units of BMI</h5>
+                                    <div class="card-body">
+                                      <h5 class="card-title">Estimated CLBR<sup>*</sup></h5>
+                                      <h4>{{ clbr_months["loose3"] }}</h4>
+                                  </div>
+                                  <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">Weight goal between {{ loose3["w_min"] }} kg and {{ loose3["w_max"] }} kg</li>
+                                    <li class="list-group-item">Weight reduction between {{ loose3["loss_2max"] }} kg and {{ loose3["loss_2min"] }} kg</li>
+                                  </ul>
+                              </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card h-100">
+                                        <h5 class="card-header">...and reduce 4 units of BMI</h5>
+                                        <div class="card-body">
+                                          <h5 class="card-title">Estimated CLBR<sup>*</sup></h5>
+                                          <h4>{{ clbr_months["loose4"] }}</h4>
+                                      </div>
+                                      <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">Weight goal between {{ loose4["w_min"] }} kg and {{ loose4["w_max"] }} kg</li>
+                                        <li class="list-group-item">Weight reduction between {{ loose4["loss_2max"] }} kg and {{ loose4["loss_2min"] }} kg</li>
+                                      </ul>
+                                  </div>
+                                </div>
+                                <div class="col-12">
+                                  <p>
+                                    *In case there is a male partner, the decrease in Cumulative Live Birth Rate per year, due to male ageing, is estimated to be -0.91% and should be accounted for.
+                                  </p>
+                                  </div>
+            {% endif %}
+            </div>
+        </div>
+
+
+      </div>
+    </div>
+</div>
+
+{% endblock %}
